@@ -36,8 +36,7 @@ class Stations(Base):
     elevation = Column(Float)
     
 database_path = "Resources/hawaii.sqlite"
-#engine =  create_engine(f"sqlite:///{database_path}")
-engine=create_engine('sqlite:///data.db', echo=True, connect_args={"check_same_thread": False})
+engine =  create_engine(f"sqlite:///{database_path}")
 conn = engine.connect()
 session = Session(bind=engine)
 
@@ -61,22 +60,6 @@ session = Session(bind=engine)
 # index_prcp_date_df = pd.read_sql(my_data.statement, my_data.session.bind).set_index("date")
 # index_prcp_date_df.head(25)my_data = session.query(M.prcp, M.date).filter(M.date >= one_year_ago,  M.date <= max_date)
 
-def test ():
-    return "Hello work"
-
-
-# def test2():
-
-# #find max date
-
-#     max_date = session.query(func.max(M.date)).first()[0]
-#     pprint(max_date)
-#     one_year_ago = max_date - timedelta(days=365)
-#     one_year_ago
-#     my_data = session.query(M).filter(M.date >= one_year_ago,  M.date <= max_date)
-#     print (str(my_data))
-#     return str(my_data)
-
 @app.route("/")
 def welcome():
     return (
@@ -89,29 +72,45 @@ def welcome():
         f"/api/v1.0/<start>/<end>"
     )
 
+#find max date
 
+    #prcp = list(np.ravel(prcps))
 
 #Convert the query results to a dictionary using `date` as the key and `prcp` as the value.
-# @app.route("/api/v1.0/precipitation")
-# def recent_yr_dict():
-#     max_date = session.query(func.max(M.date)).first()[0]
-#     one_year_ago = max_date - timedelta(days=365)
-#     #dates = session.query(M.date).filter(M.date >= one_year_ago,  M.date <= max_date)
-#     prcps = session.query(M.date, M.prcp).filter(M.date >= one_year_ago,  M.date <= max_date)
-#     #prcp = list(np.ravel(prcps))
-
-#     prcp_dict = {date: recent_yr_dict for date, recent_yr_dict in prcps}
-#     return jsonify(prcp_dict)
-
-
 @app.route("/api/v1.0/precipitation")
 def recent_yr_prcp_dict():
-   with engine.connect() as conn:
-         session = Session(bind=engine)
-         max_date = session.query(func.max(M.date)).first()[0]
-         prcp = session.query(M.date, M.prcp).filter(M.date >= "2016-08-23").filter(M.date <= "2017-08-23").all()
-         prcp_dict = {date: recent_yr_prcp_dict for date, recent_yr_prcp_dict in prcp}
-   return jsonify(prcp_dict)
+
+    max_date = session.query(func.max(M.date)).first()[0]
+    one_year_ago = max_date - timedelta(days=365)
+    dates = session.query(M.date).filter(M.date >= one_year_ago,  M.date <= max_date)
+    date_str = str(dates)
+    prcps = session.query(M.date, M.prcp).filter(M.date >= one_year_ago,  M.date <= max_date)
+    prcp = session.query(M.date, M.prcp).filter(M.date >= one_year_ago,  M.date <= max_date).all()
+
+    prcp_dict = {date: recent_yr_prcp_dict for str(date), recent_yr_prcp_dict in prcp}
+    return jsonify(prcp_dict)
+
+
+
+
+    #ps = session.query(M.date, M.prcp).filter(M.date >= "2016-08-23").filter(M.date <= "2017-08-23").all()
+    # max_date = session.query(func.max(M.date)).first()[0]
+    # one_year_ago = max_date - timedelta(days=365)
+    # dates = session.query(M.date).filter(M.date >= one_year_ago,  M.date <= max_date)
+    # date_str = str([dates])
+    # prcps = session.query(M.date, M.prcp).filter(M.date >= one_year_ago,  M.date <= max_date)
+    # prcp_dict = {date_str: precipitation for date_str, precipitation in prcps}
+    # return jsonify(prcp_dict)
+
+
+    # max_date = session.query(func.max(M.date)).first()[0]
+    # one_year_ago = max_date - timedelta(days=365)
+    # dates = session.query(M.date).filter(M.date >= one_year_ago,  M.date <= max_date)
+    # date_str = str(dates)
+    # prcps = session.query(M.date, M.prcp).filter(M.date >= one_year_ago,  M.date <= max_date)
+    
+
+    
 
     # for prcp in prcps.all():
     #     return ({dates: prcps})
@@ -123,10 +122,7 @@ def recent_yr_prcp_dict():
     #for prcp in prcps:
       #  return(prcp)
     
-@app.route("/api/v1.0/stations")
-def station_list():
-    stations = session.query(M.station).group_by(M.station).all()
-    return jsonify (stations)
+    
     
 
 if __name__ == "__main__":
