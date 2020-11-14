@@ -66,7 +66,7 @@ def recent_yr_prcp ():
     one_year_ago_query = session.query(M.date, M.prcp).filter(M.date >= string_date,  M.date <= max_string_date).all()
     prcp = list(np.ravel(one_year_ago_query))
         
-    print(f"Below is the past 12 months precipation value by date")
+    #print(f"Below is the past 12 months precipation value by date")
     return jsonify (precipitation = prcp)
     
 @app.route("/api/v1.0/station-count")
